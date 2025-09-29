@@ -11,9 +11,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
     public static NetworkManager Instance;
 
-    [SerializeField] private NetworkRunner runnerPrefab;
     private NetworkRunner _runner;
-
     public NetworkRunner Runner => _runner;
 
     private void Awake()
@@ -42,22 +40,17 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         try
         {
-            // 🔹 Destruye runner previo si existe
             if (_runner != null)
             {
                 await _runner.Shutdown();
-                Destroy(_runner);
                 _runner = null;
             }
 
-            // 🔹 Crear runner nuevo
             _runner = gameObject.AddComponent<NetworkRunner>();
             _runner.ProvideInput = true;
             _runner.AddCallbacks(this);
 
-            var sceneManager = _runner.GetComponent<INetworkSceneManager>();
-            if (sceneManager == null)
-                sceneManager = _runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
+            var sceneManager = _runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
 
             var startArgs = new StartGameArgs()
             {
@@ -81,7 +74,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             }
 
             UIManager.Instance?.UpdatePlayersCount();
-
             Debug.Log($"✅ Sala creada: {roomCode} ({maxPlayers} jugadores, {rounds} rondas)");
             return true;
         }
@@ -96,19 +88,20 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         try
         {
-            if (_runner == null)
+            if (_runner != null)
             {
-                _runner = gameObject.AddComponent<NetworkRunner>();
-                _runner.AddCallbacks(this);
+                await _runner.Shutdown();
+                _runner = null;
             }
 
-            var startArgs = new StartGameArgs()
+            _runner = gameObject.AddComponent<NetworkRunner>();
+            _runner.AddCallbacks(this);
+
+            var result = await _runner.StartGame(new StartGameArgs()
             {
                 GameMode = GameMode.Client,
                 SessionName = roomCode
-            };
-
-            var result = await _runner.StartGame(startArgs);
+            });
 
             if (!result.Ok)
             {
@@ -117,7 +110,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             }
 
             UIManager.Instance?.UpdatePlayersCount();
-
             Debug.Log($"✅ Unido a la sala: {roomCode}");
             return true;
         }
@@ -128,14 +120,14 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    public void LeaveRoom()
+    public async Task LeaveRoom()
     {
         if (_runner != null)
         {
-            _runner.Shutdown();
-            Destroy(_runner);
+            Debug.Log("🔻 Apagando runner...");
+            await _runner.Shutdown();
             _runner = null;
-            Debug.Log("✅ Runner destruido, NetworkManager sigue vivo");
+            Debug.Log("✅ Runner apagado correctamente");
         }
     }
 
@@ -153,11 +145,10 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log($"👤 Jugador desconectado: {player}");
         UIManager.Instance?.UpdatePlayersCount();
 
-        // Si eres host y no quedan jugadores, destruye la sesión
-        if (_runner != null && _runner.IsServer && _runner.ActivePlayers.Count() == 0)
+        if (_runner != null && _runner.IsServer && !_runner.ActivePlayers.Any())
         {
             Debug.Log("❌ No quedan jugadores, cerrando sesión...");
-            LeaveRoom();
+            _ = LeaveRoom();
         }
     }
 

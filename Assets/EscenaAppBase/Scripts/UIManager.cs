@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Threading.Tasks;
 
 public class UIManager : MonoBehaviour
 {
@@ -42,6 +43,21 @@ public class UIManager : MonoBehaviour
     public void ShowCrearSala() => ShowCanvas(crearSalaCanvas);
     public void ShowEntrarSala() => ShowCanvas(entrarSalaCanvas);
     public void ShowLobbyMenu() => ShowCanvas(lobbyMenuCanvas);
+
+    /// <summary>
+    /// Método seguro para salir del lobby y volver al menú principal.
+    /// Llama a LeaveRoom() en el NetworkManager antes de mostrar el menú.
+    /// </summary>
+    public async void BackToMainMenu()
+    {
+        if (NetworkManager.Instance != null && NetworkManager.Instance.Runner != null)
+        {
+            Debug.Log("🔻 Cerrando sesión antes de volver al menú...");
+            await NetworkManager.Instance.LeaveRoom();
+        }
+
+        ShowMainMenu();
+    }
 
     // ==== Manejo de Textos del Lobby ====
     public void SetLobbyCode(string code)

@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class CreateRoomUI : MonoBehaviour
 {
     [SerializeField] private Button createButton;
     [SerializeField] private Button[] playerCountButtons;
     [SerializeField] private Button[] durationButtons;
+    [SerializeField] private TMP_Text statusText;
 
     private int selectedPlayers = 0;
     private int selectedRounds = 0;
@@ -47,13 +49,17 @@ public class CreateRoomUI : MonoBehaviour
     private async void OnCreateButton()
     {
         if (selectedPlayers <= 0 || selectedRounds <= 0) return;
+
         if (NetworkManager.Instance == null)
         {
-            Debug.LogError("❌ NetworkManager no existe!");
-            return;
+            Debug.LogWarning("⚠️ No había NetworkManager, creando uno nuevo...");
+            var go = new GameObject("NetworkManager");
+            go.AddComponent<NetworkManager>();
         }
 
         var code = NetworkManager.Instance.GenerateRoomCode();
+        statusText.text = "Creando sala...";
+
         bool ok = await NetworkManager.Instance.CreateRoomAsHost(code, selectedPlayers, selectedRounds);
 
         if (ok)
@@ -62,10 +68,11 @@ public class CreateRoomUI : MonoBehaviour
             UIManager.Instance?.SetLobbyCode(code);
             UIManager.Instance?.SetLobbyRounds(selectedRounds);
             UIManager.Instance?.UpdatePlayersCount();
+            statusText.text = $"✅ Sala creada: {code}";
         }
         else
         {
-            Debug.LogError("⚠️ Error creando sala");
+            statusText.text = "❌ Error creando sala";
         }
     }
 }

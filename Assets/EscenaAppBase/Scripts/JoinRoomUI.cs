@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Fusion;
 
 public class JoinRoomUI : MonoBehaviour
 {
@@ -23,13 +22,20 @@ public class JoinRoomUI : MonoBehaviour
             return;
         }
 
+        if (NetworkManager.Instance == null)
+        {
+            Debug.LogWarning("⚠️ No había NetworkManager, creando uno nuevo...");
+            var go = new GameObject("NetworkManager");
+            go.AddComponent<NetworkManager>();
+        }
+
         statusText.text = "Conectando...";
         bool ok = await NetworkManager.Instance.JoinRoomByCode(code);
 
         if (ok)
         {
-            UIManager.Instance.ShowLobbyMenu();
-            UIManager.Instance.SetLobbyCode(code);
+            UIManager.Instance?.ShowLobbyMenu();
+            UIManager.Instance?.SetLobbyCode(code);
 
             if (NetworkManager.Instance.Runner != null)
             {
@@ -41,8 +47,8 @@ public class JoinRoomUI : MonoBehaviour
                 }
             }
 
-            // ✅ Se actualiza al instante incluyendo al que acaba de entrar
-            UIManager.Instance.UpdatePlayersCount();
+            UIManager.Instance?.UpdatePlayersCount();
+            statusText.text = $"✅ Unido a {code}";
         }
         else
         {
