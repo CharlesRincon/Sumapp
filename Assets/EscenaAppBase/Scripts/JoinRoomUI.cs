@@ -18,13 +18,13 @@ public class JoinRoomUI : MonoBehaviour
         var code = codeInput.text.Trim();
         if (string.IsNullOrEmpty(code))
         {
-            statusText.text = "⚠️ Introduce un código de sala.";
+            statusText.text = "Introduce un código de sala.";
             return;
         }
 
         if (NetworkManager.Instance == null)
         {
-            Debug.LogWarning("⚠️ No había NetworkManager, creando uno nuevo...");
+            Debug.LogWarning("No había NetworkManager, creando uno nuevo...");
             var go = new GameObject("NetworkManager");
             go.AddComponent<NetworkManager>();
         }
@@ -48,11 +48,11 @@ public class JoinRoomUI : MonoBehaviour
             }
 
             UIManager.Instance?.UpdatePlayersCount();
-            statusText.text = $"✅ Unido a {code}";
+            statusText.text = $"Unido a {code}";
         }
         else
         {
-            statusText.text = "❌ No se pudo unir a la sala.";
+            statusText.text = "No se pudo unir a la sala.";
         }
     }
 }

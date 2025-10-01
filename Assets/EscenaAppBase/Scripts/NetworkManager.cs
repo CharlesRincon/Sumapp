@@ -95,12 +95,17 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             }
 
             _runner = gameObject.AddComponent<NetworkRunner>();
+            _runner.ProvideInput = true; // <- necesario si el cliente va a mandar input
             _runner.AddCallbacks(this);
+
+            var sceneManager = _runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
 
             var result = await _runner.StartGame(new StartGameArgs()
             {
                 GameMode = GameMode.Client,
-                SessionName = roomCode
+                SessionName = roomCode,
+                Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
+                SceneManager = sceneManager
             });
 
             if (!result.Ok)
@@ -128,6 +133,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             await _runner.Shutdown();
             _runner = null;
             Debug.Log("✅ Runner apagado correctamente");
+
+            // 🔄 Actualiza la UI al salir
+            UIManager.Instance?.UpdatePlayersCount();
         }
     }
 
