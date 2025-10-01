@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class UIManager : MonoBehaviour
 {
@@ -74,10 +75,10 @@ public class UIManager : MonoBehaviour
 
     public void UpdatePlayersCount()
     {
-        if (lobbyPlayersText != null && NetworkManager.Instance?.Runner?.SessionInfo != null)
+        if (lobbyPlayersText != null && NetworkManager.Instance?.Runner != null)
         {
-            int current = NetworkManager.Instance.Runner.SessionInfo.PlayerCount;
-            int max = NetworkManager.Instance.Runner.SessionInfo.MaxPlayers;
+            int current = NetworkManager.Instance.Runner.ActivePlayers.Count();
+            int max = NetworkManager.Instance.Runner.SessionInfo?.MaxPlayers ?? 0;
             lobbyPlayersText.text = $"{current}/{max}";
         }
     }
