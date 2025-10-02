@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject crearSalaCanvas;
     [SerializeField] private GameObject entrarSalaCanvas;
     [SerializeField] private GameObject lobbyMenuCanvas;
+    [SerializeField] private GameObject ARMenuCanvas;
 
     [Header("Lobby UI Texts")]
     [SerializeField] private TMP_Text lobbyCodeText;
@@ -43,6 +44,7 @@ public class UIManager : MonoBehaviour
     public void ShowCrearSala() => ShowCanvas(crearSalaCanvas);
     public void ShowEntrarSala() => ShowCanvas(entrarSalaCanvas);
     public void ShowLobbyMenu() => ShowCanvas(lobbyMenuCanvas);
+    public void ShowARMenu() => ShowCanvas(ARMenuCanvas);
 
     /// <summary>
     /// Método seguro para salir del lobby y volver al menú principal.
