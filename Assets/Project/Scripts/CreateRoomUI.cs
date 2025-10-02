@@ -9,6 +9,9 @@ public class CreateRoomUI : MonoBehaviour
     [SerializeField] private Button[] durationButtons;
     [SerializeField] private TMP_Text statusText;
 
+    [SerializeField] private int shortRounds = 10;
+    [SerializeField] private int standarRounds = 15;
+    [SerializeField] private int longRounds = 20;
     private int selectedPlayers = 0;
     private int selectedRounds = 0;
 
@@ -22,9 +25,9 @@ public class CreateRoomUI : MonoBehaviour
             playerCountButtons[i].onClick.AddListener(() => OnSelectPlayers(count));
         }
 
-        durationButtons[0].onClick.AddListener(() => OnSelectRounds(10));
-        durationButtons[1].onClick.AddListener(() => OnSelectRounds(15));
-        durationButtons[2].onClick.AddListener(() => OnSelectRounds(20));
+        durationButtons[0].onClick.AddListener(() => OnSelectRounds(shortRounds));
+        durationButtons[1].onClick.AddListener(() => OnSelectRounds(standarRounds));
+        durationButtons[2].onClick.AddListener(() => OnSelectRounds(longRounds));
 
         createButton.onClick.AddListener(OnCreateButton);
     }
