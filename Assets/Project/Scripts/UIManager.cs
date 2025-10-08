@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Threading.Tasks;
+using Vuforia;
 
 public class UIManager : MonoBehaviour
 {
@@ -38,6 +39,19 @@ public class UIManager : MonoBehaviour
         lobbyMenuCanvas.SetActive(false);
 
         canvas.SetActive(true);
+
+        if (canvas == ARMenuCanvas)
+        {
+            Debug.Log("Activando cámara AR...");
+            if (VuforiaBehaviour.Instance != null)
+                VuforiaBehaviour.Instance.enabled = true;
+        }
+        else
+        {
+            Debug.Log("Apagando cámara AR...");
+            if (VuforiaBehaviour.Instance != null)
+                VuforiaBehaviour.Instance.enabled = false;
+        }
     }
 
     public void ShowMainMenu() => ShowCanvas(mainMenuCanvas);
