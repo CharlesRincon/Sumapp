@@ -1,7 +1,8 @@
 using UnityEngine;
 using TMPro;
-using System.Threading.Tasks;
 using Vuforia;
+using Fusion;
+using System.Linq;
 
 public class UIManager : MonoBehaviour
 {
@@ -13,11 +14,14 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject entrarSalaCanvas;
     [SerializeField] private GameObject lobbyMenuCanvas;
     [SerializeField] private GameObject ARMenuCanvas;
+    [SerializeField] private GameObject characterSelectMenuCanvas;
+    public CharacterSelectUI CharacterSelectUI { get; private set; }
 
     [Header("Lobby UI Texts")]
     [SerializeField] private TMP_Text lobbyCodeText;
     [SerializeField] private TMP_Text lobbyRoundsText;
     [SerializeField] private TMP_Text lobbyPlayersText;
+    [SerializeField] private TMP_Text lobbyCharacterText;
 
     private void Awake()
     {
@@ -28,6 +32,7 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         ShowCanvas(mainMenuCanvas);
+        CharacterSelectUI = characterSelectMenuCanvas.GetComponent<CharacterSelectUI>();
     }
 
     // ==== Manejo de Canvases ====
@@ -37,9 +42,19 @@ public class UIManager : MonoBehaviour
         crearSalaCanvas.SetActive(false);
         entrarSalaCanvas.SetActive(false);
         lobbyMenuCanvas.SetActive(false);
+        characterSelectMenuCanvas.SetActive(false);
+        ARMenuCanvas.SetActive(false);
 
         canvas.SetActive(true);
 
+        // 🔁 Reiniciar UI según el canvas mostrado
+        if (canvas == crearSalaCanvas)
+            crearSalaCanvas.GetComponent<CreateRoomUI>()?.ResetUI();
+
+        if (canvas == entrarSalaCanvas)
+            entrarSalaCanvas.GetComponent<JoinRoomUI>()?.ResetUI();
+
+        // Cámara AR
         if (canvas == ARMenuCanvas)
         {
             Debug.Log("Activando cámara AR...");
@@ -59,11 +74,8 @@ public class UIManager : MonoBehaviour
     public void ShowEntrarSala() => ShowCanvas(entrarSalaCanvas);
     public void ShowLobbyMenu() => ShowCanvas(lobbyMenuCanvas);
     public void ShowARMenu() => ShowCanvas(ARMenuCanvas);
+    public void ShowCharacterSelectMenu() => ShowCanvas(characterSelectMenuCanvas);
 
-    /// <summary>
-    /// Método seguro para salir del lobby y volver al menú principal.
-    /// Llama a LeaveRoom() en el NetworkManager antes de mostrar el menú.
-    /// </summary>
     public async void BackToMainMenu()
     {
         if (NetworkManager.Instance != null && NetworkManager.Instance.Runner != null)
@@ -88,13 +100,34 @@ public class UIManager : MonoBehaviour
             lobbyRoundsText.text = $"{rounds} Rondas";
     }
 
+    /// <summary>
+    /// Actualiza el texto de jugadores en tiempo real.
+    /// </summary>
     public void UpdatePlayersCount()
     {
-        if (lobbyPlayersText != null && NetworkManager.Instance?.Runner?.SessionInfo != null)
+        if (lobbyPlayersText == null)
         {
-            int current = NetworkManager.Instance.Runner.SessionInfo.PlayerCount;
-            int max = NetworkManager.Instance.Runner.SessionInfo.MaxPlayers;
-            lobbyPlayersText.text = $"{current}/{max}";
+            Debug.LogWarning("No se ha asignado el texto de jugadores en el inspector.");
+            return;
         }
+
+        var runner = NetworkManager.Instance?.Runner;
+        if (runner == null || !runner.IsRunning)
+        {
+            lobbyPlayersText.text = "Jugadores: 0";
+            return;
+        }
+
+        int current = runner.ActivePlayers.Count(); // ✅ más confiable que SessionInfo.PlayerCount
+        int max = runner.SessionInfo != null ? runner.SessionInfo.MaxPlayers : 0;
+
+        lobbyPlayersText.text = $"Jugadores: {current}/{max}";
+        Debug.Log($"👥 Jugadores actualizados: {current}/{max}");
+    }
+
+    public void SetLobbyCharacterName(string name)
+    {
+        if (lobbyCharacterText != null)
+            lobbyCharacterText.text = name;
     }
 }

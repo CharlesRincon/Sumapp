@@ -52,7 +52,7 @@ public class CreateRoomUI : MonoBehaviour
 
         if (NetworkManager.Instance == null)
         {
-            Debug.LogWarning("⚠️ No había NetworkManager, creando uno nuevo...");
+            Debug.LogWarning("No había NetworkManager, creando uno nuevo...");
             var go = new GameObject("NetworkManager");
             go.AddComponent<NetworkManager>();
         }
@@ -64,15 +64,23 @@ public class CreateRoomUI : MonoBehaviour
 
         if (ok)
         {
-            UIManager.Instance?.ShowLobbyMenu();
+            UIManager.Instance?.ShowCharacterSelectMenu();
             UIManager.Instance?.SetLobbyCode(code);
             UIManager.Instance?.SetLobbyRounds(selectedRounds);
             UIManager.Instance?.UpdatePlayersCount();
-            statusText.text = $"✅ Sala creada: {code}";
+            statusText.text = $"Sala creada: {code}";
         }
         else
         {
-            statusText.text = "❌ Error creando sala";
+            statusText.text = "Error creando sala";
         }
+    }
+
+    public void ResetUI()
+    {
+        selectedPlayers = 0;
+        selectedRounds = 0;
+        statusText.text = "";
+        createButton.interactable = false;
     }
 }
